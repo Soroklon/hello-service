@@ -41,7 +41,7 @@ jobs:
           docker build -t hello-service:latest .
 
       - name: Setup kubectl
-        uses: azure/setp-kubectl@v3
+        uses: azure/setup-kubectl@v3
         with:
           version: 'v1.30.0'
       
