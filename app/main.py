@@ -9,3 +9,7 @@ def hello():
 @app.get("/bonjour")
 def hello_test():
     return {"message": "Bonjour from CI/CD!"}
+
+@app.get("/root")
+def hello_test():
+    return {"message": "Root route"}
