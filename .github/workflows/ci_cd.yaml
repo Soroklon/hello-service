@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline (Local Kubernetes)
 
 on:
   push:
@@ -8,8 +8,7 @@ on:
 
 jobs:
   build-test:
-    runs_on: ubuntu-latest
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,21 +26,34 @@ jobs:
       - name: Run tests
         run: pytest -v
       
-  docker-build-push:
+  docker-build-deploy:
     needs: build-test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Set up Docker
+        uses: docker/setup-docker@v3
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/hello-service:${{ github.sha }}
+        run: |
+          docker build -t hello-service:latest .
 
-      - name: Push docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/hello-service:${{ github.sha }}
+      - name: Setup kubectl
+        uses: azure/setp-kubectl@v3
+        with:
+          version: 'v1.30.0'
+      
+      - name: Load kubeconfig
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
+        
+      - name: Load image into kind cluster
+        run: |
+          kind load docker-image hello-service:latest
+      
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl set image deployment/hello-service hello-service=hello-service:latest
