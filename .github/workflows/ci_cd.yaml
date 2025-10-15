@@ -1,4 +1,4 @@
-name: CI/CD Pipeline (Local Kubernetes)
+name: Local CI/CD Pipeline
 
 on:
   push:
@@ -32,26 +32,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Set up Docker
-        uses: docker/setup-docker@v3.10.0
 
       - name: Build Docker image
-        run: |
-          docker build -t hello-service:latest .
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'v1.30.0'
+        run: docker build -t hello-service:latest .
       
       - name: Load kubeconfig
         run: |
           echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
         
       - name: Load image into kind cluster
-        run: |
-          kind load docker-image hello-service:latest
+        run: kind load docker-image hello-service:latest
       
       - name: Deploy to Kubernetes
         run: |
