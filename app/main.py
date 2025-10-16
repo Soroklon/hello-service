@@ -12,4 +12,4 @@ def hello_test():
 
 @app.get("/root")
 def hello_test():
-    return {"message": "Root route"}
+    return {"message": "Root endpoint"}
