@@ -32,4 +32,4 @@ jobs:
           kubectl delete pod -1 app=hello-service || true
       
       - name: Check pods
-        run: kubectl get pods -w
+        run: kubectl get pods
