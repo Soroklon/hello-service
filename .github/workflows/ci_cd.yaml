@@ -8,14 +8,7 @@ on:
       - 'k8s/prometheus.yaml'
       - 'k8s/grafana.yaml'
 
-  # Отдельный триггер для обновления мониторинга
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'k8s/prometheus.yaml'
-      - 'k8s/grafana.yaml'
 
 jobs:
   app-deploy:
@@ -61,8 +54,7 @@ jobs:
     needs: app-deploy
     if: |
       github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[monitoring]') ||
-      github.event_name == 'push'
+      contains(github.event.head_commit.message, '[monitoring]')
 
     steps:
       - name: Checkout repository
