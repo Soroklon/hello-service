@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -17,3 +18,12 @@ def test_root():
     response = client.get("/root")
     assert response.status_code == 200
     assert response.json() == {"message": "Root endpoint"}
+
+@pytest.mark.parametrize("name, answer", [
+    ("Name", "Hello, Name! This is FastAPI example with CI/CD process"),
+    ("abc", "Hello, abc! This is FastAPI example with CI/CD process")
+])
+def test_hello_by_name(name, answer):
+    response = client.get(f"/hello/{name}")
+    assert response.status_code == 200
+    assert response.json() == {"message": answer}

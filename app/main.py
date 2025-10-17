@@ -6,6 +6,10 @@ app = FastAPI()
 def hello():
     return {"message": "Hello from CI/CD!"}
 
+@app.get("/hello/{name}")
+def hello_by_name(name: str):
+    return {"message": f"Hello, {name}! This is FastAPI example with CI/CD process"}
+
 @app.get("/bonjour")
 def hello_test():
     return {"message": "Bonjour from CI/CD!"}
