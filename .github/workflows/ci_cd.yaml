@@ -29,14 +29,14 @@ jobs:
         run: |
           docker build -t $IMAGE_TAG --label ci_cd_pipeline=true .
 
+      - name: Run tests
+        run: |
+          docker run --rm $IMAGE_TAG pytest tests/
+
       - name: Cleanup old Docker images
         run: |
           docker images hello-service --filter "label=ci_cd_pipeline=true" --format "{{.ID}}" | \
           tail -n +2 | xargs -r docker rmi -f || true
-      
-      - name: Run tests
-        run: |
-          docker run --rm --pull=never $IMAGE_TAG pytest tests/
 
       - name: Load image into Kind
         run: |
@@ -48,7 +48,7 @@ jobs:
           kubectl apply -f k8s/service.yaml
           kubectl set image deployment/hello-service hello-service=$IMAGE_TAG
           kubectl rollout status deployment hello-service --timeout=300s
-      
+
       - name: Check pods
         run: |
           kubectl get pods -o wide
@@ -79,5 +79,5 @@ jobs:
           echo "Forwarding Grafana to localhost:30300 and Prometheus to localhost:30090"
           kubectl port-forward svc/grafana 30300:3000 &
           kubectl port-forward svc/prometheus 30090:9090 &
-          sleep 5  # даём портам подняться
+          sleep 5
           echo "You can access Grafana at http://localhost:30300 and Prometheus at http://localhost:30090"
