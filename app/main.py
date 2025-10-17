@@ -8,7 +8,7 @@ def hello():
 
 @app.get("/hello/{name}")
 def hello_by_name(name: str):
-    return {"message": f"Hello, {name}! This is FastAPI example with CI/CD process"}
+    return {"message": f"Hello, {name}!"}
 
 @app.get("/bonjour")
 def hello_test():
@@ -17,3 +17,7 @@ def hello_test():
 @app.get("/root")
 def hello_test():
     return {"message": "Root endpoint"}
+
+@app.get("/about")
+def about():
+    return {"message": "This is FastAPI application with CI/CD workflow useing local Docker image"}
