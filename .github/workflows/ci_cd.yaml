@@ -42,7 +42,6 @@ jobs:
           kubectl delete pod -l app=hello-service --ignore-not-found
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
-          kubectl patch deployment hello-service -p '{"spec": {"strategy": {"type": "Recreate"}}}'
           kubectl set image deployment/hello-service hello-service=$IMAGE_TAG
           kubectl rollout restart deployment hello-service
           kubectl rollout status deployment hello-service --timeout=300s
