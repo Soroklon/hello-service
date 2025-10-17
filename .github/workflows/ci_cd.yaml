@@ -27,11 +27,10 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build --no-cache -t $IMAGE_TAG --label ci_cd_pipeline=true .
+          docker build -t $IMAGE_TAG --label ci_cd_pipeline=true .
 
       - name: Cleanup old Docker images
         run: |
-          # Удаляем все старые CI/CD образы hello-service, кроме последнего
           docker images hello-service --filter "label=ci_cd_pipeline=true" --format "{{.ID}}" | \
           tail -n +2 | xargs -r docker rmi -f || true
       
@@ -45,11 +44,9 @@ jobs:
 
       - name: Deploy application to Kubernetes
         run: |
-          kubectl delete pod -l app=hello-service --ignore-not-found
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
           kubectl set image deployment/hello-service hello-service=$IMAGE_TAG
-          kubectl rollout restart deployment hello-service
           kubectl rollout status deployment hello-service --timeout=300s
       
       - name: Check pods
