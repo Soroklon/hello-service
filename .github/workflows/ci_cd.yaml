@@ -36,7 +36,7 @@ jobs:
       
       - name: Run tests
         run: |
-          docker run --rm $IMAGE_TAG pytest tests/
+          docker run --rm --pull=never $IMAGE_TAG pytest tests/
 
       - name: Load image into Kind
         run: |
