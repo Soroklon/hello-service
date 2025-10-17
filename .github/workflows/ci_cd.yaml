@@ -4,11 +4,24 @@ on:
   push:
     branches: 
       - main
+    paths-ignore:
+      - 'k8s/prometheus.yaml'
+      - 'k8s/grafana.yaml'
+
+  # Отдельный триггер для обновления мониторинга
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'k8s/prometheus.yaml'
+      - 'k8s/grafana.yaml'
 
 jobs:
-  docker-test-deploy:
+  app-deploy:
+    name: Build, Test & Deploy App
     runs-on: self-hosted
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -23,7 +36,7 @@ jobs:
         run: |
           docker build --no-cache -t $IMAGE_TAG .
       
-      - name: Run test in Docker
+      - name: Run tests
         run: |
           docker run --rm $IMAGE_TAG pytest tests/
 
@@ -31,7 +44,7 @@ jobs:
         run: |
           kind load docker-image $IMAGE_TAG --name hello-cluster
 
-      - name: Deploy to Kubernetes
+      - name: Deploy application to Kubernetes
         run: |
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
@@ -41,3 +54,25 @@ jobs:
       - name: Check pods
         run: |
           kubectl get pods -o wide
+
+  monitoring-deploy:
+    name: Deploy Monitoring Stack
+    runs-on: self-hosted
+    needs: app-deploy
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, '[monitoring]') ||
+      github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy Prometheus and Grafana
+        run: |
+          echo "🚀 Applying Prometheus and Grafana manifests..."
+          kubectl apply -f k8s/prometheus.yaml
+          kubectl apply -f k8s/grafana.yaml
+          kubectl rollout status deployment prometheus --timeout=60s || true
+          kubectl rollout status deployment grafana --timeout=60s || true
+          echo "✅ Monitoring stack deployed."
