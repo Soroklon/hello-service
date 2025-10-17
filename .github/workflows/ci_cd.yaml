@@ -6,31 +6,22 @@ on:
       - main
 
 jobs:
-  build-test-deploy:
+  docker-test-deploy:
     runs-on: self-hosted
-
+    
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install pytest
-
-      - name: Run tests
-        run: pytest -v || true
+        uses: actions/checkout@v3
       
       - name: Build Docker image
         run: |
           docker build -t hello-service:latest .
+      
+      - name: Run test in Docker
+        run: |
+          docker run --rm hello-service:latest pytest tests/
 
-      - name: Load image into kind
+      - name: Load image into Kind
         run: |
           kind load docker-image hello-service:latest --name hello-cluster
 
@@ -38,4 +29,7 @@ jobs:
         run: |
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
-          kubectl rollout status deployment/hello-service
+          kubectl delete pod -1 app=hello-service || true
+      
+      - name: Check pods
+        run: kubectl get pods -w
