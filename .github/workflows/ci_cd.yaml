@@ -29,7 +29,8 @@ jobs:
         run: |
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
-          kubectl delete pod -1 app=hello-service || true
+          kubectl set image deployment/hello-service hello-service=hello-service:latest
+          kubectl rollout status deployment hello-service --timeout=60s
       
       - name: Check pods
-        run: kubectl get pods
+        run: kubectl get pods -o wide
