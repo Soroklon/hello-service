@@ -25,9 +25,17 @@ jobs:
           IMAGE_TAG=hello-service:$(git rev-parse --short HEAD)
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-      - name: Build Docker image
+      - name: Use Minikube Docker
         run: |
-          docker build --pull=false -t $IMAGE_TAG --label ci_cd_pipeline=true .
+          eval $(minikube docker-env)
+      
+      - name: Preload base Python image
+        run: |
+          docker pull python:3.11-slim
+
+      - name: Build Docker image inside Minikube
+        run: |
+          docker build -t $IMAGE_TAG --label ci_cd_pipeline=true .
 
       - name: Run tests
         run: |
@@ -38,14 +46,6 @@ jobs:
           docker images hello-service --filter "label=ci_cd_pipeline=true" --format "{{.ID}}" | \
           tail -n +2 | xargs -r docker rmi -f || true
 
-      - name: Use Minikube Docker
-        run: |
-          eval $(minikube docker-env)
-          docker build -t $IMAGE_TAG --label ci_cd_pipeline=true .
-
-      #- name: Load image into Minikube
-      #  run: |
-      #    minikube image load $IMAGE_TAG
 
       - name: Deploy application to Kubernetes
         run: |
@@ -78,3 +78,9 @@ jobs:
           kubectl rollout status deployment prometheus --timeout=60s || true
           kubectl rollout status deployment grafana --timeout=60s || true
           echo "Monitoring stack deployed."
+      
+      - name: Show access URLs
+        run: |
+          echo "Hello Service:  http://localhost:30000"
+          echo "Grafana:        http://localhost:30000"
+          echo "Prometheus:     http://localhost:30000"
