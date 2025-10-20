@@ -38,9 +38,14 @@ jobs:
           docker images hello-service --filter "label=ci_cd_pipeline=true" --format "{{.ID}}" | \
           tail -n +2 | xargs -r docker rmi -f || true
 
-      - name: Load image into Minikube
+      - name: Use Minikube Docker
         run: |
-          minikube image load $IMAGE_TAG
+          eval $(minikube docker-env)
+          docker build -t $IMAGE_TAG --label ci_cd_pipeline=true .
+
+      #- name: Load image into Minikube
+      #  run: |
+      #    minikube image load $IMAGE_TAG
 
       - name: Deploy application to Kubernetes
         run: |
