@@ -38,9 +38,9 @@ jobs:
           docker images hello-service --filter "label=ci_cd_pipeline=true" --format "{{.ID}}" | \
           tail -n +2 | xargs -r docker rmi -f || true
 
-      - name: Load image into Kind
+      - name: Load image into Minikube
         run: |
-          kind load docker-image $IMAGE_TAG --name hello-cluster
+          minikube image load $IMAGE_TAG
 
       - name: Deploy application to Kubernetes
         run: |
@@ -73,11 +73,3 @@ jobs:
           kubectl rollout status deployment prometheus --timeout=60s || true
           kubectl rollout status deployment grafana --timeout=60s || true
           echo "Monitoring stack deployed."
-
-      - name: Port-forward Grafana and Prometheus
-        run: |
-          echo "Forwarding Grafana to localhost:30300 and Prometheus to localhost:30090"
-          kubectl port-forward svc/grafana 30300:3000 &
-          kubectl port-forward svc/prometheus 30090:9090 &
-          sleep 5
-          echo "You can access Grafana at http://localhost:30300 and Prometheus at http://localhost:30090"
