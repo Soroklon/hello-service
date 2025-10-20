@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t $IMAGE_TAG --label ci_cd_pipeline=true .
+          docker build --pull=false -t $IMAGE_TAG --label ci_cd_pipeline=true .
 
       - name: Run tests
         run: |
