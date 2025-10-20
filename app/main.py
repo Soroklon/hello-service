@@ -1,30 +1,12 @@
 from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
-# from contextlib import asynccontextmanager
 
 app = FastAPI()
 Instrumentator().instrument(app).expose(app)
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     Instrumentator().instrument(app).expose(app)
-#     yield
-
-@app.get("/hello")
-def hello():
-    return {"message": "Hello from CI/CD!"}
-
 @app.get("/hello/{name}")
 def hello_by_name(name: str):
     return {"message": f"Hello, {name}!"}
-
-@app.get("/bonjour")
-def hello_test():
-    return {"message": "Bonjour from CI/CD!"}
-
-@app.get("/root")
-def hello_root():
-    return {"message": "Root endpoint"}
 
 @app.get("/about")
 def about():

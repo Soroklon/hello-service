@@ -1,4 +1,4 @@
-#!/home/soroklon/Prj/CI_CD_Sample/.venv/bin/python3
+#!/home/soroklon/Prj/CI_CD_hello_service/.venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
