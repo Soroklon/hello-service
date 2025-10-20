@@ -26,16 +26,13 @@ jobs:
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Use Minikube Docker
-        run: |
-          eval $(minikube docker-env)
+        run: eval $(minikube docker-env)
       
       - name: Preload base Python image
-        run: |
-          docker pull python:3.11-slim
+        run: docker pull python:3.11-slim
 
       - name: Build Docker image inside Minikube
-        run: |
-          docker build -t $IMAGE_TAG --label ci_cd_pipeline=true .
+        run: docker build -t $IMAGE_TAG --label ci_cd_pipeline=true .
 
       - name: Run tests
         run: |
@@ -81,6 +78,7 @@ jobs:
       
       - name: Show access URLs
         run: |
-          echo "Hello Service:  http://localhost:30000"
-          echo "Grafana:        http://localhost:30000"
-          echo "Prometheus:     http://localhost:30000"
+          MINIKUBE_IP=$(minikube ip)
+          echo "Hello Service:  http://$MINIKUBE_IP:30000"
+          echo "Grafana:        http://$MINIKUBE_IP:30000"
+          echo "Prometheus:     http://$MINIKUBE_IP:30000"
